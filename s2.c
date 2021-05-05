@@ -14,6 +14,8 @@
 #define FACE_ZPOS 4
 #define FACE_ZNEG 5
 
+#define debug printf
+
 uint64_t ll_to_s2(int latE6, int lonE6) {
    double lat = ((double) latE6) / 100000.0L;
    double lon = ((double) lonE6) / 100000.0L;
@@ -60,26 +62,33 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
          result = FACE_ZPOS;
       }
    }
+   debug("face = %ld\n", result);
+   debug("u = %lf\n", u);
+   debug("v = %lf\n", v);
 
    // u and v now range [-1,1]
 
-   double s = 4.0L * M_1_PI * atan(u);
-   double t = 4.0L * M_1_PI * atan(v);
+   double s = (1.0L + 4.0L * M_1_PI * atan(u)) / 2.0L;
+   debug("s = %lf\n", s);
 
-   s = 1.0L + (s + 1.0L) / 2.0L;
-   t = 1.0L + (s + 1.0L) / 2.0L;
+   double t = (1.0L + 4.0L * M_1_PI * atan(v)) / 2.0L;
+   debug("t = %lf\n", t);
 
    for (int i = 0; i < 30; i++) {
       result <<= 2;
       if (s >= .5L) {
          result |= 2LL;
-         s *= 2.0L;
+         s -= 0.5L;
       }
+      s *= 2.0L;
       if (t >= .5L) {
          result |= 1LL;
-         t *= 2.0L;
+         t -= 0.5L;
       }
+      t *= 2.0L;
    }
+
+   debug("s2=%llX\n", result);
 
    return result;
 }
@@ -94,19 +103,25 @@ int *s2_to_ll(uint64_t s2) {
       s /= 2.0L;
       t /= 2.0L;
       if (s2 & 2LL) {
-         s += 0.5L;
+         s = s + 0.5L;
       }
       if (s2 & 1LL) {
-         t += 0.5L;
+         t = t + 0.5L;
       }
       s2 >>= 2;
    }
+   debug("s = %lf\n", s);
+   debug("t = %lf\n", t);
 
-   double u = tan((s * 2.0L) - 1.0L) * M_PI / 4.0L;
-   double v = tan((t * 2.0L) - 1.0L) * M_PI / 4.0L;
+   double u = tan(((s * 2.0L - 1.0L) * M_PI) / 4.0L);
+   debug("u = %lf\n", u);
+
+   double v = tan(((t * 2.0L - 1.0L) * M_PI) / 4.0L);
+   debug("v = %lf\n", v);
 
    double x, y, z;
 
+   debug("face = %ld\n", s2);
    switch(s2) {
       case FACE_XPOS:
          x = 1.0;
