@@ -14,15 +14,27 @@
 #define FACE_ZPOS 4
 #define FACE_ZNEG 5
 
-#define debug printf
+#define DEG_TO_RAD (M_PI / 180.0L)
+#define RAD_TO_DEG (180.0L / M_PI)
+
+//#define debug printf
+#define debug(x, ...)
 
 uint64_t ll_to_s2(int latE6, int lonE6) {
-   double lat = ((double) latE6) / 100000.0L;
-   double lon = ((double) lonE6) / 100000.0L;
+   double lat = ((double) latE6) / 1000000.0L;
+   lat *= DEG_TO_RAD;
+   debug("lat = %lf\n", lat);
+
+   double lon = ((double) lonE6) / 1000000.0L;
+   lon *= DEG_TO_RAD;
+   debug("lon = %lf\n", lon);
 
    double x = cos(lat) * cos(lon);
    double y = cos(lat) * sin(lon);
    double z = sin(lat);
+   debug("x = %lf\n", x);
+   debug("y = %lf\n", y);
+   debug("z = %lf\n", z);
 
    double ratio;
    double u, v;
@@ -159,11 +171,19 @@ int *s2_to_ll(uint64_t s2) {
    x /= r;
    y /= r;
    z /= r;
+   debug("x = %lf\n", x);
+   debug("y = %lf\n", y);
+   debug("z = %lf\n", z);
 
    double lat, lon;
 
+   lat = asin(z);
+   lat *= RAD_TO_DEG;
+   debug("lat = %lf\n", lat);
+
    lon = atan2(y, x);
-   lat = atan(sqrt(x * x + y * y) / z);
+   lon *= RAD_TO_DEG;
+   debug("lon = %lf\n", lon);
 
    result[0] = lat * 1000000.0;
    result[1] = lon * 1000000.0;
