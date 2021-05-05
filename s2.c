@@ -191,6 +191,7 @@ int *s2_to_ll(uint64_t s2) {
    return result;
 }
 
+#ifdef TEST
 void main(void) {
    int latE6 = 37749000;
    int lonE6 = -122419400;
@@ -200,5 +201,5 @@ void main(void) {
    int *ret = s2_to_ll(s2);
 
    printf("%d %d\n%d %d\n", latE6, lonE6, ret[0], ret[1]);
-
 }
+#endif
