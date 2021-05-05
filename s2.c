@@ -17,8 +17,11 @@
 #define DEG_TO_RAD (M_PI / 180.0L)
 #define RAD_TO_DEG (180.0L / M_PI)
 
+#ifdef TEST
 //#define debug printf
+#else
 #define debug(x, ...)
+#endif
 
 uint64_t ll_to_s2(int latE6, int lonE6) {
    double lat = ((double) latE6) / 1000000.0L;

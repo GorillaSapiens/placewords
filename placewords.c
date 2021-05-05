@@ -19,7 +19,7 @@ uint64_t f(uint64_t n) {
 }
 
 // forward LFSR_SIZE times
-uint64_t f52(uint64_t n) {
+uint64_t f_many(uint64_t n) {
    for (int i = 0; i < LFSR_SIZE; i++) {
       n = f(n);
    }
@@ -43,7 +43,7 @@ uint64_t g(uint64_t n) {
 }
 
 // reverse LFSR_SIZE times
-uint64_t g52(uint64_t n) {
+uint64_t g_many(uint64_t n) {
    for (int i = 0; i < LFSR_SIZE; i++) {
       n = g(n);
    }
