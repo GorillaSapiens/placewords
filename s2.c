@@ -4,21 +4,22 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 
 // TODO S2
-#define FACE_XPOS 0
-#define FACE_XNEG 1
-#define FACE_YPOS 2
-#define FACE_YNEG 3
-#define FACE_ZPOS 4
-#define FACE_ZNEG 5
+#define FACE_XPOS 0 // africa
+#define FACE_YPOS 1 // asia
+#define FACE_ZPOS 2 // north
+#define FACE_XNEG 3 // pacific
+#define FACE_YNEG 4 // americas
+#define FACE_ZNEG 5 // south
 
 #define DEG_TO_RAD (M_PI / 180.0L)
 #define RAD_TO_DEG (180.0L / M_PI)
 
 #ifdef TEST
-//#define debug printf
+#define debug printf
 #else
 #define debug(x, ...)
 #endif
@@ -103,7 +104,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
       t *= 2.0L;
    }
 
-   debug("s2=%llX\n", result);
+   debug("s2=%lX\n", result);
 
    return result;
 }
@@ -195,9 +196,14 @@ int *s2_to_ll(uint64_t s2) {
 }
 
 #ifdef TEST
-void main(void) {
+void main(int argc, char **argv) {
    int latE6 = 37749000;
    int lonE6 = -122419400;
+
+   if (argc > 1) {
+      latE6 = atoi(argv[1]);
+      lonE6 = atoi(argv[2]);
+   }
 
    uint64_t s2 = ll_to_s2(latE6, lonE6);
 
