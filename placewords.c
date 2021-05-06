@@ -158,6 +158,34 @@ uint64_t placewords_to_s2(const char *placewords) {
    if (word3 == -1) {
       return S2_ERROR;
    }
+
+   if (word1 > 16384) {
+      word1 -= 16384;
+      face |=  4;
+   }
+   if (word2 > 16384) {
+      word2 -= 16384;
+      face |=  2;
+   }
+   if (word3 > 16384) {
+      word3 -= 16384;
+      face |=  1;
+   }
+
+   uint64_t loci = word1;
+   loci <<= BITS_PER_WORD;
+   loci |= word2;
+   loci <<= BITS_PER_WORD;
+   loci |= word3;
+
+   loci = g_many(loci);
+
+   uint64_t s2 = face;
+   s2 <<= (BITS_PER_WORD * 3);
+   s2 |= loci;
+   s2 <<= EXCESS;
+
+   return s2;
 }
 
 #ifdef TEST
@@ -172,7 +200,9 @@ int main(void) {
    printf("%011lx %011lx\n", f_many(1), g_many(f_many(1)));
 
    for (int i = 0; i < 8192; i++) {
-      printf("%s\n", s2_to_placewords(i << EXCESS));
+      const char *p = s2_to_placewords(i << EXCESS);
+
+      printf("%s %ld\n", p, placewords_to_s2(p) >> EXCESS);
    }
 
    return 0;
