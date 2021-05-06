@@ -26,12 +26,12 @@
 
 uint64_t ll_to_s2(int latE6, int lonE6) {
    double lat = ((double) latE6) / 1000000.0L;
-   lat *= DEG_TO_RAD;
    debug("lat = %lf\n", lat);
+   lat *= DEG_TO_RAD;
 
    double lon = ((double) lonE6) / 1000000.0L;
-   lon *= DEG_TO_RAD;
    debug("lon = %lf\n", lon);
+   lon *= DEG_TO_RAD;
 
    double x = cos(lat) * cos(lon);
    double y = cos(lat) * sin(lon);
@@ -47,35 +47,41 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
 
    if (fabs(x) >= fabs(y) && fabs(x) >= fabs(z)){
       ratio = fabs(x);
-      u = y / ratio;
-      v = z / ratio;
-      if (x < 0) {
-         result = FACE_XNEG;
+      if (x >= 0.0L) {
+         result = FACE_XPOS;
+         u = y / ratio;
+         v = z / ratio;
       }
       else {
-         result = FACE_XPOS;
+         result = FACE_XNEG;
+         u = -y / ratio;
+         v = -z / ratio;
       }
    }
    else if (fabs(y) >= fabs(z) && fabs(y) >= fabs(x)){
       ratio = fabs(y);
-      u = z / ratio;
-      v = x / ratio;
-      if (y < 0) {
-         result = FACE_YNEG;
+      if (y >= 0.0L) {
+         result = FACE_YPOS;
+         u = z / ratio;
+         v = -x / ratio;
       }
       else {
-         result = FACE_YPOS;
+         result = FACE_YNEG;
+         u = -z / ratio;
+         v = x / ratio;
       }
    }
    else if (fabs(z) >= fabs(x) && fabs(z) >= fabs(y)){
       ratio = fabs(z);
-      u = x / ratio;
-      v = y / ratio;
-      if (z < 0) {
-         result = FACE_ZNEG;
+      if (z >= 0.0L) {
+         result = FACE_ZPOS;
+         u = -x / ratio;
+         v = -y / ratio;
       }
       else {
-         result = FACE_ZPOS;
+         result = FACE_ZNEG;
+         u = x / ratio;
+         v = y / ratio;
       }
    }
    debug("face = %ld\n", result);
@@ -146,22 +152,22 @@ int *s2_to_ll(uint64_t s2) {
          break;
       case FACE_XNEG:
          x = -1.0;
-         y = u;
-         z = v;
+         y = -u;
+         z = -v;
          break;
       case FACE_YPOS:
-         x = v;
+         x = -v;
          y = 1.0;
          z = u;
          break;
       case FACE_YNEG:
          x = v;
          y = -1.0;
-         z = u;
+         z = -u;
          break;
       case FACE_ZPOS:
-         x = u;
-         y = v; 
+         x = -u;
+         y = -v; 
          z = 1.0;
          break;
       case FACE_ZNEG:
