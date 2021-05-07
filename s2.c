@@ -279,34 +279,34 @@ int *s2_to_ll(uint64_t s2) {
 }
 
 #ifdef TEST
+struct {
+   int latE6, lonE6;
+   uint64_t s2;
+} vector[] = {
+   { 33533333, -7583333, 4551834481361344707LL }, // 0, casablanca
+   { 28613895, 77209006, 4110909809715404065LL }, // 1, new delhi
+   { 55755833, 37617222, 5095060306123625331LL }, // 2, moscow
+   { -27467778, 153028056, 7751075513880745065LL }, // 3, brisbane
+   { 37749000, -122419400, -9182982296397125021LL }, // 4, san francisco
+   { -77.846323,166.668235, -5803106435262993021LL } // 5, mcmurdo
+};
+
 void main(int argc, char **argv) {
-   // wikipedia says San Francisco is here...
-   int latE6 = 37749000;
-   int lonE6 = -122419400;
-
-   // or get it from the command line...
-   if (argc > 1) {
-      latE6 = atoi(argv[1]);
-      lonE6 = atoi(argv[2]);
+   for (int i = 0; i < 6; i++) {
+      uint64_t s2 = ll_to_s2(vector[i].latE6, vector[i].lonE6);
+      int *ret = s2_to_ll(s2);
+      printf("####\n# %d %d\n# %d %d\n", vector[i].latE6, vector[i].lonE6, ret[0], ret[1]);
+      printf("# %016lx %016lx\n", vector[i].s2, s2);
    }
-
-   uint64_t oof = -9182982296397125021LL;
-   printf("oof=%016lx\n", oof);
-   int *hrm = s2_to_ll(0x4047bf20a2463531LL);
-   printf("hrm=%016llx %d %d\n", 0x808f7e41448c6a63LL >> 1, hrm[0], hrm[1]);
-
-   uint64_t s2 = ll_to_s2(latE6, lonE6);
-   int *ret = s2_to_ll(s2);
-   printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
 
    // test the planet in 1 degree increments, worldwide
    // we skip latitude +/- 90, because of ambiguity
    // ditto for longitude -180
    int imperfect = 0;
-   for (latE6 = -89000000; latE6 < 90000000; latE6 += 1000000) {
-      for (lonE6 = -179000000; lonE6 < 180000000; lonE6 += 1000000) {
-         s2 = ll_to_s2(latE6, lonE6);
-         ret = s2_to_ll(s2);
+   for (int latE6 = -89000000; latE6 < 90000000; latE6 += 1000000) {
+      for (int lonE6 = -179000000; lonE6 < 180000000; lonE6 += 1000000) {
+         uint64_t s2 = ll_to_s2(latE6, lonE6);
+         int *ret = s2_to_ll(s2);
          printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
          if(abs(latE6-ret[0]) > EPSILON || abs(lonE6-ret[1]) > EPSILON) {
             printf("OOPS\n");
