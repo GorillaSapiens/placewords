@@ -98,17 +98,38 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
    debug("t = %lf\n", t);
 
    for (int i = 0; i < 30; i++) {
+      // this bit is mind bending...
+
       result <<= 2;
-      if (s >= .5L) {
-         result |= 2LL;
-         s -= 0.5L;
-      }
+
       s *= 2.0L;
-      if (t >= .5L) {
-         result |= 1LL;
-         t -= 0.5L;
-      }
       t *= 2.0L;
+
+      int hilbert = (s > 1.0L ? 3 : 0) ^ (t > 1.0L ? 1 : 0);
+      result |= (uint64_t) hilbert;
+
+      double tmp;
+
+      switch (hilbert) {
+         case 0:
+            tmp = s;
+            s = t;
+            t = tmp;
+            break;
+         case 1:
+            t -= 1.0L;
+            break;
+         case 2:
+            s -= 1.0L;
+            t -= 1.0L;
+            break;
+         case 3:
+            s -= 1.0L;
+            tmp = s;
+            s = 1.0L - t;
+            t = 1.0L - tmp;
+            break;
+      }
    }
 
    debug("s2=%lX\n", result);
@@ -121,16 +142,33 @@ int *s2_to_ll(uint64_t s2) {
    static int result[2] = { 0, 0 }; // lat, lon
 
    double s = 0.0L, t = 0.0L;
+   double tmp;
 
    for (int i = 0; i < 30; i++) {
+      switch (s2 & 3) {
+         case 0:
+            tmp = s;
+            s = t;
+            t = tmp;
+            break;
+         case 1:
+            t += 1.0L;
+            break;
+         case 2:
+            s += 1.0L;
+            t += 1.0L;
+            break;
+         case 3:
+            tmp = s;
+            s = 1.0L - t;
+            t = 1.0L - tmp;
+            s += 1.0L;
+            break;
+      }
+
       s /= 2.0L;
       t /= 2.0L;
-      if (s2 & 2LL) {
-         s = s + 0.5L;
-      }
-      if (s2 & 1LL) {
-         t = t + 0.5L;
-      }
+
       s2 >>= 2;
    }
    debug("s = %lf\n", s);
