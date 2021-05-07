@@ -1,13 +1,14 @@
-// not REALLY S2, but you will find this has many similarities...
-
-// TODO FIX: look for "TODO S2" and make corrections
+// S2 from scratch, there may be bugs here where
+// things don't line up perfectly w/S2, but it's
+// close enough to use for debugging placewords
+// without pulling in the full weight of the S2
+// library.
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
 
-// TODO S2
 #define FACE_XPOS 0 // africa
 #define FACE_YPOS 1 // asia
 #define FACE_ZPOS 2 // north
