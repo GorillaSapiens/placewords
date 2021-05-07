@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 $nnn = 0;
+$rrr = 0;
 
 @parts = (
       "Noun", "Verb", "Adverb", "Adjective", "Pronoun",
@@ -9,7 +10,7 @@ $nnn = 0;
 
 @bad = (
       "Translingual", "plural_of", "homophones", "Proper noun",
-      "Abreviation of"
+      "Abreviation of", "Initialism of", "letter-case"
       );
 
 while (<>) {
@@ -23,11 +24,13 @@ while (<>) {
    open FILE, "/tmp/b.txt";
    @cont = <FILE>;
    foreach $line (@cont) {
-      if ($line =~ /<span class=\"toctext\">English<\/span>/) {
+      if ($line =~ /<span class=\"toctext\">English<\/span>/ ||
+          $line =~ /<span class=\"mw-headline\" id="English">English<\/span>/) {
          $is_english++;
       }
       foreach $part (@parts) {
-         if ($line =~ /<span class=\"toctext\">$part<\/span>/) {
+         if ($line =~ /<span class=\"toctext\">$part<\/span>/ ||
+             $line =~ /<span class=\"mw-headline\" id="$part">$part<\/span>/) {
             $has_part++;
          }
       }
@@ -42,14 +45,16 @@ while (<>) {
    close FILE;
 
 #   print "$is_english $has_part\n";
+   $nnn++;
    if ($is_english && $has_part && !length($has_bad)) {
       print "$word\n";
 #      print STDERR "$nnn accept $word\n";
    }
    else {
-      print STDERR "$nnn reject $word $is_english $has_part $has_bad\n";
+      $rrr++;
+      $ratio = int(100 * $rrr / $nnn);
+      print STDERR "$nnn reject $ratio $word $is_english $has_part $has_bad\n";
    }
-   $nnn++;
 
    sleep .1;
 }

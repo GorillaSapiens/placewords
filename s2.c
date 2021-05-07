@@ -143,8 +143,9 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
       }
    }
 
+   result <<= 1;
+
    debug("s2=%lX\n", result);
-   debug("real_s2=%lX\n", result<<1);
 
    return result;
 }
@@ -166,6 +167,8 @@ int double_to_E6(double in) {
 // caution, returns static pointer to 2 ints, overwritten per call
 int *s2_to_ll(uint64_t s2) {
    static int result[2] = { 0, 0 }; // lat, lon
+
+   s2 >>= 1;
 
    // i had s=t=0 here, but that led to more errors than
    // using 0.5L as a starting value
