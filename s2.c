@@ -4,8 +4,6 @@
 // without pulling in the full weight of the S2
 // library.
 
-
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -27,6 +25,8 @@
 #else
 #define debug(x, ...)
 #endif
+
+#define QUADRATIC
 
 // forward convert from latE6, lonE6 to 64 bit S2
 uint64_t ll_to_s2(int latE6, int lonE6) {
@@ -95,10 +95,17 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
 
    // u and v now range [-1,1]
 
+#if TANGENT
    double s = (1.0L + 4.0L * M_1_PI * atan(u)) / 2.0L;
-   debug("s = %.16lf\n", s);
-
    double t = (1.0L + 4.0L * M_1_PI * atan(v)) / 2.0L;
+#endif
+#ifdef QUADRATIC
+   double s = (u >= 0.0L) ? (0.5L * sqrt(1.0L + 3.0L * u)) :
+         (1.0L - 0.5L * sqrt(1.0L - 3.0L * u));
+   double t = (v >= 0.0L) ? (0.5L * sqrt(1.0L + 3.0L * v)) :
+         (1.0L - 0.5L * sqrt(1.0L - 3.0L * v));
+#endif
+   debug("s = %.16lf\n", s);
    debug("t = %.16lf\n", t);
 
    for (int i = 0; i < 30; i++) {
@@ -195,10 +202,17 @@ int *s2_to_ll(uint64_t s2) {
    debug("s = %.16lf\n", s);
    debug("t = %.16lf\n", t);
 
+#ifdef TANGENT
    double u = tan(((s * 2.0L - 1.0L) * M_PI) / 4.0L);
-   debug("u = %.16lf\n", u);
-
    double v = tan(((t * 2.0L - 1.0L) * M_PI) / 4.0L);
+#endif
+#ifdef QUADRATIC
+   double u = (s >= 0.5L) ? ((4.0L * s * s - 1) / 3.0L) :
+      ((1.0L - 4.0L * (1.0L - s) * (1.0L - s)) / 3.0L);
+   double v = (t >= 0.5L) ? ((4.0L * t * t - 1) / 3.0L) :
+      ((1.0L - 4.0L * (1.0L - t) * (1.0L - t)) / 3.0L);
+#endif
+   debug("u = %.16lf\n", u);
    debug("v = %.16lf\n", v);
 
    double x, y, z;
