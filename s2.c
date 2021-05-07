@@ -144,6 +144,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
    }
 
    result <<= 1;
+   result |= 1LL;
 
    debug("s2=%lX\n", result);
 
@@ -283,12 +284,12 @@ struct {
    int latE6, lonE6;
    uint64_t s2;
 } vector[] = {
-   { 33533333, -7583333, 4551834481361344707LL }, // 0, casablanca
+   { 33533333, -7583333, 983529568086062495LL }, // 0, casablanca
    { 28613895, 77209006, 4110909809715404065LL }, // 1, new delhi
    { 55755833, 37617222, 5095060306123625331LL }, // 2, moscow
    { -27467778, 153028056, 7751075513880745065LL }, // 3, brisbane
    { 37749000, -122419400, -9182982296397125021LL }, // 4, san francisco
-   { -77.846323,166.668235, -5803106435262993021LL } // 5, mcmurdo
+   { -77846323,166668235, -5803106435262993021LL } // 5, mcmurdo
 };
 
 void main(int argc, char **argv) {
@@ -297,6 +298,7 @@ void main(int argc, char **argv) {
       int *ret = s2_to_ll(s2);
       printf("####\n# %d %d\n# %d %d\n", vector[i].latE6, vector[i].lonE6, ret[0], ret[1]);
       printf("# %016lx %016lx\n", vector[i].s2, s2);
+      printf("# %016lx %016lx\n", vector[i].s2>>1, s2>>1);
    }
 
    // test the planet in 1 degree increments, worldwide
