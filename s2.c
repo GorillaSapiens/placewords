@@ -109,7 +109,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
       s *= 2.0L;
       t *= 2.0L;
 
-      int hilbert = (s > 1.0L ? 3 : 0) ^ (t > 1.0L ? 1 : 0);
+      int hilbert = (s >= 1.0L ? 3 : 0) ^ (t >= 1.0L ? 1 : 0);
       result |= (uint64_t) hilbert;
 
       double tmp;
@@ -137,6 +137,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
    }
 
    debug("s2=%lX\n", result);
+   debug("real_s2=%lX\n", result<<1);
 
    return result;
 }
@@ -271,6 +272,11 @@ void main(int argc, char **argv) {
       latE6 = atoi(argv[1]);
       lonE6 = atoi(argv[2]);
    }
+
+   uint64_t oof = -9182982296397125021LL;
+   printf("oof=%016lx\n", oof);
+   int *hrm = s2_to_ll(0x4047bf20a2463531LL);
+   printf("hrm=%016llx %d %d\n", 0x808f7e41448c6a63LL >> 1, hrm[0], hrm[1]);
 
    uint64_t s2 = ll_to_s2(latE6, lonE6);
    int *ret = s2_to_ll(s2);
