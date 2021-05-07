@@ -20,6 +20,7 @@
 
 #ifdef TEST
 #define debug printf
+#define EPSILON 6
 #else
 #define debug(x, ...)
 #endif
@@ -189,11 +190,11 @@ int *s2_to_ll(uint64_t s2) {
 
    lat = asin(z);
    lat *= RAD_TO_DEG;
-   debug("lat = %lf\n", lat);
+   debug("lat = %lf\n", (double) lat);
 
    lon = atan2(y, x);
    lon *= RAD_TO_DEG;
-   debug("lon = %lf\n", lon);
+   debug("lon = %lf\n", ((double) lon));
 
    result[0] = lat * 1000000.0;
    result[1] = lon * 1000000.0;
@@ -212,9 +213,19 @@ void main(int argc, char **argv) {
    }
 
    uint64_t s2 = ll_to_s2(latE6, lonE6);
-
    int *ret = s2_to_ll(s2);
+   printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
 
-   printf("%d %d\n%d %d\n", latE6, lonE6, ret[0], ret[1]);
+   for (latE6 = -89000000; latE6 < 90000000; latE6 += 1000000) {
+      for (lonE6 = -179000000; lonE6 < 180000000; lonE6 += 1000000) {
+         s2 = ll_to_s2(latE6, lonE6);
+         ret = s2_to_ll(s2);
+         printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
+         if(abs(latE6-ret[0]) > EPSILON || abs(lonE6-ret[1]) > EPSILON) {
+            printf("OOPS\n");
+            exit(-1);
+         }
+      }
+   }
 }
 #endif
