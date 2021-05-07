@@ -1,18 +1,20 @@
 #!/usr/bin/perl
 
 # George Carlin's Seven Dirty Words
-@seven = (
+# and a few more
+@dirty = (
       "shit",
       "piss",
       "fuck",
       "cunt",
       "cocksucker",
       "motherfucker",
-      "tits" );
+      "tits",
+      "asshole" );
 
 while (<>) {
    $score = 0;
-   foreach $word (@seven) {
+   foreach $word (@dirty) {
       if ($_ =~ /$word/) {
          $score++;
       }

@@ -110,6 +110,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
 
    for (int i = 0; i < 30; i++) {
       // this bit is mind bending...
+      // see https://en.wikipedia.org/wiki/Hilbert_curve#/media/File:Hilbert_curve_production_rules!.svg
 
       result <<= 2;
 
@@ -177,6 +178,7 @@ int *s2_to_ll(uint64_t s2) {
    double tmp;
 
    for (int i = 0; i < 30; i++) {
+      // ... unbending mind is bit this
       switch (s2 & 3) {
          case 0:
             tmp = s;
