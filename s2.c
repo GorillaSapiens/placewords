@@ -4,6 +4,8 @@
 // without pulling in the full weight of the S2
 // library.
 
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -21,26 +23,27 @@
 
 #ifdef TEST
 #define debug printf
-#define EPSILON 6
+#define EPSILON 3
 #else
 #define debug(x, ...)
 #endif
 
+// forward convert from latE6, lonE6 to 64 bit S2
 uint64_t ll_to_s2(int latE6, int lonE6) {
    double lat = ((double) latE6) / 1000000.0L;
-   debug("lat = %lf\n", lat);
+   debug("lat = %.16lf\n", lat);
    lat *= DEG_TO_RAD;
 
    double lon = ((double) lonE6) / 1000000.0L;
-   debug("lon = %lf\n", lon);
+   debug("lon = %.16lf\n", lon);
    lon *= DEG_TO_RAD;
 
    double x = cos(lat) * cos(lon);
    double y = cos(lat) * sin(lon);
    double z = sin(lat);
-   debug("x = %lf\n", x);
-   debug("y = %lf\n", y);
-   debug("z = %lf\n", z);
+   debug("x = %.16lf\n", x);
+   debug("y = %.16lf\n", y);
+   debug("z = %.16lf\n", z);
 
    double ratio;
    double u, v;
@@ -87,16 +90,16 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
       }
    }
    debug("face = %ld\n", result);
-   debug("u = %lf\n", u);
-   debug("v = %lf\n", v);
+   debug("u = %.16lf\n", u);
+   debug("v = %.16lf\n", v);
 
    // u and v now range [-1,1]
 
    double s = (1.0L + 4.0L * M_1_PI * atan(u)) / 2.0L;
-   debug("s = %lf\n", s);
+   debug("s = %.16lf\n", s);
 
    double t = (1.0L + 4.0L * M_1_PI * atan(v)) / 2.0L;
-   debug("t = %lf\n", t);
+   debug("t = %.16lf\n", t);
 
    for (int i = 0; i < 30; i++) {
       // this bit is mind bending...
@@ -138,11 +141,27 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
    return result;
 }
 
+int double_to_E6(double in) {
+   long double integer;
+   long double extra = modfl(in * 1000000.0L, &integer);
+   if (extra > .5L) {
+      integer += 1.0L;
+   }
+   else if (extra < -.5L) {
+      integer -= 1.0L;
+   }
+
+   return (int) integer;
+}
+
+// backward convert from 64 bit S2 to latE6, lonE6
 // caution, returns static pointer to 2 ints, overwritten per call
 int *s2_to_ll(uint64_t s2) {
    static int result[2] = { 0, 0 }; // lat, lon
 
-   double s = 0.0L, t = 0.0L;
+   // i had s=t=0 here, but that led to more errors than
+   // using 0.5L as a starting value
+   double s = 0.5L, t = 0.5L;
    double tmp;
 
    for (int i = 0; i < 30; i++) {
@@ -172,14 +191,14 @@ int *s2_to_ll(uint64_t s2) {
 
       s2 >>= 2;
    }
-   debug("s = %lf\n", s);
-   debug("t = %lf\n", t);
+   debug("s = %.16lf\n", s);
+   debug("t = %.16lf\n", t);
 
    double u = tan(((s * 2.0L - 1.0L) * M_PI) / 4.0L);
-   debug("u = %lf\n", u);
+   debug("u = %.16lf\n", u);
 
    double v = tan(((t * 2.0L - 1.0L) * M_PI) / 4.0L);
-   debug("v = %lf\n", v);
+   debug("v = %.16lf\n", v);
 
    double x, y, z;
 
@@ -221,31 +240,33 @@ int *s2_to_ll(uint64_t s2) {
    x /= r;
    y /= r;
    z /= r;
-   debug("x = %lf\n", x);
-   debug("y = %lf\n", y);
-   debug("z = %lf\n", z);
+   debug("x = %.16lf\n", x);
+   debug("y = %.16lf\n", y);
+   debug("z = %.16lf\n", z);
 
    double lat, lon;
 
    lat = asin(z);
    lat *= RAD_TO_DEG;
-   debug("lat = %lf\n", (double) lat);
+   debug("lat = %.16lf\n", (double) lat);
 
    lon = atan2(y, x);
    lon *= RAD_TO_DEG;
-   debug("lon = %lf\n", ((double) lon));
+   debug("lon = %.16lf\n", ((double) lon));
 
-   result[0] = lat * 1000000.0;
-   result[1] = lon * 1000000.0;
+   result[0] = double_to_E6(lat);
+   result[1] = double_to_E6(lon);
 
    return result;
 }
 
 #ifdef TEST
 void main(int argc, char **argv) {
+   // wikipedia says San Francisco is here...
    int latE6 = 37749000;
    int lonE6 = -122419400;
 
+   // or get it from the command line...
    if (argc > 1) {
       latE6 = atoi(argv[1]);
       lonE6 = atoi(argv[2]);
@@ -255,6 +276,10 @@ void main(int argc, char **argv) {
    int *ret = s2_to_ll(s2);
    printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
 
+   // test the planet in 1 degree increments, worldwide
+   // we skip latitude +/- 90, because of ambiguity
+   // ditto for longitude -180
+   int imperfect = 0;
    for (latE6 = -89000000; latE6 < 90000000; latE6 += 1000000) {
       for (lonE6 = -179000000; lonE6 < 180000000; lonE6 += 1000000) {
          s2 = ll_to_s2(latE6, lonE6);
@@ -264,7 +289,12 @@ void main(int argc, char **argv) {
             printf("OOPS\n");
             exit(-1);
          }
+         if(abs(latE6-ret[0]) > 0 || abs(lonE6-ret[1]) > 0) {
+            printf("CLOSE %d %d %d %d\n", latE6, lonE6, ret[0], ret[1]);
+            imperfect++;
+         }
       }
    }
+   printf("%d imperfect\n", imperfect);
 }
 #endif
