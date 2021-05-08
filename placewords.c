@@ -68,13 +68,13 @@ uint64_t g_many(uint64_t n) {
 const char *s2_to_placewords(uint64_t s2) {
    static char result[256];
 
-   printf("s2=%lX %ld\n", s2, s2);
+   //printf("s2=%lX %ld\n", s2, s2);
 
    s2 >>= 1;
 
-   printf("loci2=%lld\n", (s2 >> EXCESS) & LFSR_MASK);
+   //printf("loci2=%lld\n", (s2 >> EXCESS) & LFSR_MASK);
    uint64_t loci = f_many((s2 >> EXCESS) & LFSR_MASK);
-   printf("loci=%ld\n", loci);
+   //printf("loci=%ld\n", loci);
 
    int ordinal1 = ((loci >> (BITS_PER_WORD << 1)) & WORD_MASK);
    int ordinal2 = ((loci >> BITS_PER_WORD) & WORD_MASK);
@@ -95,7 +95,7 @@ const char *s2_to_placewords(uint64_t s2) {
       ordinal3 |= 1LL;
    }
 
-   printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
+   //printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
 
    sprintf(result, "%s%s.%s.%s",
       PREFIX,
@@ -144,7 +144,7 @@ uint64_t placewords_to_s2(const char *placewords) {
       return S2_ERROR;
    }
 
-   printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
+   //printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
 
    if (ordinal1 & 1) {
       face |=  4;
@@ -156,7 +156,7 @@ uint64_t placewords_to_s2(const char *placewords) {
       face |=  1;
    }
 
-   printf("face=%ld\n", face);
+   //printf("face=%ld\n", face);
 
    ordinal1 >>= 1;
    ordinal2 >>= 1;
@@ -168,11 +168,11 @@ uint64_t placewords_to_s2(const char *placewords) {
    loci <<= BITS_PER_WORD;
    loci |= ordinal3;
 
-   printf("loci=%ld\n", loci);
+   //printf("loci=%ld\n", loci);
 
    loci = g_many(loci);
 
-   printf("loci2=%ld\n", loci);
+   //printf("loci2=%ld\n", loci);
 
    uint64_t s2 = face;
    s2 <<= (BITS_PER_WORD * 3);
@@ -182,7 +182,7 @@ uint64_t placewords_to_s2(const char *placewords) {
    s2 <<= 1;
    s2 |= 1LL;
 
-   printf("s2=%lX %ld\n", s2, s2);
+   //printf("s2=%lX %ld\n", s2, s2);
 
    return s2;
 }

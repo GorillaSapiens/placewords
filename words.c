@@ -42,9 +42,24 @@ static int hash_fn(char *p) {
    return hash;
 }
 
+int word_to_ordinal(char *word) {
+   int hash = hash_fn(word);
+   for (Word *w = by_hash[hash]; w; w = w->next_hash) {
+      if (!strcmp(word, w->word)) {
+         return w->ordinal;
+      }
+   }
+   return -1;
+}
+
 static void new_word(int ordinal, char *p) {
    if (ordinal < 0 || ordinal > sizeof(by_ordinal) / sizeof(by_ordinal[0])) {
       fprintf(stderr, "Bad ordinal %d at line %d\n", ordinal, line);
+      exit(-1);
+   }
+
+   if (-1 != word_to_ordinal(p)) {
+      fprintf(stderr, "Duplicate word %s at line %d\n", p, line);
       exit(-1);
    }
 
@@ -103,16 +118,6 @@ char *ordinal_to_word(int ordinal) {
       exit(-1);
    }
    return by_ordinal[ordinal]->word;
-}
-
-int word_to_ordinal(char *word) {
-   int hash = hash_fn(word);
-   for (Word *w = by_hash[hash]; w; w = w->next_hash) {
-      if (!strcmp(word, w->word)) {
-         return w->ordinal;
-      }
-   }
-   return -1;
 }
 
 #ifdef TEST
