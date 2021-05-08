@@ -32,8 +32,6 @@ typedef struct Word {
 static Word *by_ordinal[32768] = { NULL };
 static Word *by_hash[HASH_SIZE] = { NULL };
 
-//#define STATS
-
 #ifdef STATS
 static int hash_count[HASH_SIZE] = { 0 };
 #endif
@@ -47,11 +45,11 @@ static inline void trim(char *p) {
    *p = 0;
 }
 
-static int hash_fn(char *p) {
-   int hash = *p++;
+static unsigned int hash_fn(char *p) {
+   unsigned int hash = *p++;
    while (*p) {
       hash <<= 8;
-      hash |= *p;
+      hash |= *p++;
       do {
          int lsb = hash & 1;
          hash >>= 1;
@@ -59,7 +57,6 @@ static int hash_fn(char *p) {
             hash ^= HASH_POLY;
          }
       } while (hash >= HASH_SIZE);
-      p++;
    }
    return hash;
 }
