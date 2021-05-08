@@ -37,6 +37,7 @@ static int hash_fn(char *p) {
             hash ^= HASH_POLY;
          }
       } while (hash > HASH_SIZE);
+      p++;
    }
    return hash;
 }
@@ -113,3 +114,10 @@ int word_to_ordinal(char *word) {
    }
    return -1;
 }
+
+#ifdef TEST
+void main(void) {
+   init_words("en");
+   printf("%s %d\n", ordinal_to_word(11285), word_to_ordinal("coppa"));
+}
+#endif

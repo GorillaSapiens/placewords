@@ -1,12 +1,19 @@
-# This is a placewords words file.
+# This is a placewords words file for
+# the English(en) language.
 
 # This is a comment.
+
 # Each entry below consists of an ordinal,
-# and a comma seperated list of words associated
+# and a comma separated list of words associated
 # with that ordinal.  The last entry in the list
 # is used when generating new placewords.  This
 # allows backwards compatability in the event a
 # word needs to be changed in the future.
+
+# This file should remain UTF-8.
+
+# for debugging reasons, the first two entries
+# should always be "zero" and "one"
 
 0 zero
 1 one

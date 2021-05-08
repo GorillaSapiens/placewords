@@ -68,26 +68,40 @@ uint64_t g_many(uint64_t n) {
 const char *s2_to_placewords(uint64_t s2) {
    static char result[256];
 
-   uint64_t loci = f_many((s2 >> EXCESS) & LFSR_MASK);
-   int word1 = ((loci >> (BITS_PER_WORD << 1)) & WORD_MASK) << 1;
-   int word2 = ((loci >> BITS_PER_WORD) & WORD_MASK) << 1;
-   int word3 = (loci & WORD_MASK) << 1;
+   printf("s2=%lX %ld\n", s2, s2);
 
-   if (s2 & 4) {
-      word1 |= 1;
+   s2 >>= 1;
+
+   printf("loci2=%lld\n", (s2 >> EXCESS) & LFSR_MASK);
+   uint64_t loci = f_many((s2 >> EXCESS) & LFSR_MASK);
+   printf("loci=%ld\n", loci);
+
+   int ordinal1 = ((loci >> (BITS_PER_WORD << 1)) & WORD_MASK);
+   int ordinal2 = ((loci >> BITS_PER_WORD) & WORD_MASK);
+   int ordinal3 = (loci & WORD_MASK);
+
+   ordinal1 <<= 1;
+   ordinal2 <<= 1;
+   ordinal3 <<= 1;
+
+   // top 4 bits contain face information
+   if ((s2 >> 60)  & 4) {
+      ordinal1 |= 1LL;
    }
-   if (s2 & 2) {
-      word2 |= 1;
+   if ((s2 >> 60) & 2) {
+      ordinal2 |= 1LL;
    }
-   if (s2 & 1) {
-      word3 |= 1;
+   if ((s2 >> 60) & 1) {
+      ordinal3 |= 1LL;
    }
+
+   printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
 
    sprintf(result, "%s%s.%s.%s",
       PREFIX,
-      ordinal_to_word(word1),
-      ordinal_to_word(word2),
-      ordinal_to_word(word3));
+      ordinal_to_word(ordinal1),
+      ordinal_to_word(ordinal2),
+      ordinal_to_word(ordinal3));
 
    return result;
 }
@@ -117,45 +131,58 @@ uint64_t placewords_to_s2(const char *placewords) {
 
    uint64_t face = 0;
 
-   int word1 = word_to_ordinal(w1);
-   if (word1 == -1) {
+   int ordinal1 = word_to_ordinal(w1);
+   if (ordinal1 == -1) {
       return S2_ERROR;
    }
-   int word2 = word_to_ordinal(w2);
-   if (word2 == -1) {
+   int ordinal2 = word_to_ordinal(w2);
+   if (ordinal2 == -1) {
       return S2_ERROR;
    }
-   int word3 = word_to_ordinal(w3);
-   if (word3 == -1) {
+   int ordinal3 = word_to_ordinal(w3);
+   if (ordinal3 == -1) {
       return S2_ERROR;
    }
 
-   if (word1 & 1) {
+   printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
+
+   if (ordinal1 & 1) {
       face |=  4;
    }
-   if (word2 & 1) {
+   if (ordinal2 & 1) {
       face |=  2;
    }
-   if (word3 & 1) {
+   if (ordinal3 & 1) {
       face |=  1;
    }
 
-   word1 >>= 1;
-   word2 >>= 1;
-   word3 >>= 1;
+   printf("face=%ld\n", face);
 
-   uint64_t loci = word1;
+   ordinal1 >>= 1;
+   ordinal2 >>= 1;
+   ordinal3 >>= 1;
+
+   uint64_t loci = ordinal1;
    loci <<= BITS_PER_WORD;
-   loci |= word2;
+   loci |= ordinal2;
    loci <<= BITS_PER_WORD;
-   loci |= word3;
+   loci |= ordinal3;
+
+   printf("loci=%ld\n", loci);
 
    loci = g_many(loci);
+
+   printf("loci2=%ld\n", loci);
 
    uint64_t s2 = face;
    s2 <<= (BITS_PER_WORD * 3);
    s2 |= loci;
    s2 <<= EXCESS;
+
+   s2 <<= 1;
+   s2 |= 1LL;
+
+   printf("s2=%lX %ld\n", s2, s2);
 
    return s2;
 }
