@@ -7,10 +7,7 @@
 // a URL style prefix
 #define PREFIX "s2pw://"
 
-const char const *words[16384+16384+1] = {
 #include "words.h"
-   NULL
-};
 
 #define BITS_PER_WORD 14 // 16384 words
 #define NUM_WORDS 3
@@ -87,38 +84,12 @@ const char *s2_to_placewords(uint64_t s2) {
    }
 
    sprintf(result, "%s%s.%s.%s",
-      PREFIX, words[word1], words[word2], words[word3]);
+      PREFIX,
+      ordinal_to_word(word1),
+      ordinal_to_word(word2),
+      ordinal_to_word(word3));
 
    return result;
-}
-
-int find_word(const char *word) {
-   // binary search, could be sped up with hashtable on words
-   int begin = 0;
-   int end = (sizeof(words) / sizeof(words[0])) - 1;
-
-   while ((end - begin) > 2) {
-      int middle = (begin + end) >> 1;
-      int result = strcmp(word, words[middle]);
-      if (result == 0) {
-         return middle;
-      }
-      else if (result < 0) {
-         end = middle;
-      }
-      else {
-         begin = middle;
-      }
-   }
-
-   while (begin <= end) {
-      if (!strcmp(word, words[begin])) {
-         return begin;
-      }
-      begin++;
-   }
-
-   return -1;
 }
 
 // assumes url style "something://word.word.word.optionalword"
@@ -146,15 +117,15 @@ uint64_t placewords_to_s2(const char *placewords) {
 
    uint64_t face = 0;
 
-   int word1 = find_word(w1);
+   int word1 = word_to_ordinal(w1);
    if (word1 == -1) {
       return S2_ERROR;
    }
-   int word2 = find_word(w2);
+   int word2 = word_to_ordinal(w2);
    if (word2 == -1) {
       return S2_ERROR;
    }
-   int word3 = find_word(w3);
+   int word3 = word_to_ordinal(w3);
    if (word3 == -1) {
       return S2_ERROR;
    }
@@ -187,6 +158,10 @@ uint64_t placewords_to_s2(const char *placewords) {
    s2 <<= EXCESS;
 
    return s2;
+}
+
+void init_placewords(char *language) {
+   init_words(language);
 }
 
 #ifdef TEST
