@@ -29,8 +29,14 @@ typedef struct Word {
 
 #define HASH_SIZE 1024
 #define HASH_POLY 0x3FC
-static Word *by_ordinal[32768];
-static Word *by_hash[HASH_SIZE];
+static Word *by_ordinal[32768] = { NULL };
+static Word *by_hash[HASH_SIZE] = { NULL };
+
+//#define STATS
+
+#ifdef STATS
+static int hash_count[HASH_SIZE] = { 0 };
+#endif
 
 static int line = 0;
 
@@ -52,7 +58,7 @@ static int hash_fn(char *p) {
          if (lsb) {
             hash ^= HASH_POLY;
          }
-      } while (hash > HASH_SIZE);
+      } while (hash >= HASH_SIZE);
       p++;
    }
    return hash;
@@ -88,6 +94,9 @@ static void new_word(int ordinal, char *p) {
    int hash = hash_fn(p);
    by_ordinal[ordinal]->next_hash = by_hash[hash];
    by_hash[hash] = by_ordinal[ordinal];
+#ifdef STATS
+   hash_count[hash]++;
+#endif
 }
 
 int init_words(const char *language) {
@@ -126,6 +135,22 @@ int init_words(const char *language) {
          exit(-1);
       }
    }
+
+#ifdef STATS
+   // statistics
+   int empty = 0;
+   int sum = 0;
+   int biggest = 0;
+   int smallest = -1;
+   for (int i = 0; i < HASH_SIZE; i++) {
+      sum += hash_count[i];
+      if (!hash_count[i]) empty++;
+      if (hash_count[i] > biggest) biggest = hash_count[i];
+      if (smallest == -1 || hash_count[i] < smallest) smallest = hash_count[i];
+   }
+   printf("hash: empty=%d average=%f biggest=%d smallest=%d zero=%d\n",
+         empty, (float)sum/(float)HASH_SIZE, biggest, smallest, hash_count[0]);
+#endif
 }
 
 char *ordinal_to_word(int ordinal) {

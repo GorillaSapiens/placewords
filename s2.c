@@ -190,9 +190,10 @@ int *s2_to_ll(uint64_t s2) {
 
    s2 >>= 1;
 
-   // i had s=t=0 here, but that led to more errors than
-   // using 0.5L as a starting value
-   double s = 0.5L, t = 0.5L;
+   // // i had s=t=0 here, but that led to more errors than
+   // // using 0.5L as a starting value
+   // double s = 0.5L, t = 0.5L;
+   double s = 0.0L, t = 0.0L;
    double tmp;
 
    for (int i = 0; i < 30; i++) {
