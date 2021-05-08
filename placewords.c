@@ -72,18 +72,18 @@ const char *s2_to_placewords(uint64_t s2) {
    static char result[256];
 
    uint64_t loci = f_many((s2 >> EXCESS) & LFSR_MASK);
-   int word1 = (loci >> (BITS_PER_WORD << 1)) & WORD_MASK;
-   int word2 = (loci >> BITS_PER_WORD) & WORD_MASK;
-   int word3 = loci & WORD_MASK;
+   int word1 = ((loci >> (BITS_PER_WORD << 1)) & WORD_MASK) << 1;
+   int word2 = ((loci >> BITS_PER_WORD) & WORD_MASK) << 1;
+   int word3 = (loci & WORD_MASK) << 1;
 
    if (s2 & 4) {
-      word1 += (1 << BITS_PER_WORD);
+      word1 |= 1;
    }
    if (s2 & 2) {
-      word2 += (1 << BITS_PER_WORD);
+      word2 |= 1;
    }
    if (s2 & 1) {
-      word3 += (1 << BITS_PER_WORD);
+      word3 |= 1;
    }
 
    sprintf(result, "%s%s.%s.%s",
@@ -159,18 +159,19 @@ uint64_t placewords_to_s2(const char *placewords) {
       return S2_ERROR;
    }
 
-   if (word1 > 16384) {
-      word1 -= 16384;
+   if (word1 & 1) {
       face |=  4;
    }
-   if (word2 > 16384) {
-      word2 -= 16384;
+   if (word2 & 1) {
       face |=  2;
    }
-   if (word3 > 16384) {
-      word3 -= 16384;
+   if (word3 & 1) {
       face |=  1;
    }
+
+   word1 >>= 1;
+   word2 >>= 1;
+   word3 >>= 1;
 
    uint64_t loci = word1;
    loci <<= BITS_PER_WORD;
