@@ -199,7 +199,11 @@ int main(void) {
    printf("%011lx %011lx\n", f(1), g(f(1)));
    printf("%011lx %011lx\n", f_many(1), g_many(f_many(1)));
 
-   for (int i = 0; i < 8192; i++) {
+   for (int i = 0; i < 65536; i++) {
+      printf("%ld %ld\n", f_many(g_many(i)), g_many(f_many(i)));
+   }
+
+   for (uint64_t i = 0; i < 65536; i++) {
       const char *p = s2_to_placewords(i << EXCESS);
 
       printf("%s %ld\n", p, placewords_to_s2(p) >> EXCESS);
