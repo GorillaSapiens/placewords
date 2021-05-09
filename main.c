@@ -40,6 +40,10 @@ int main(int argc, char **argv) {
             printf("%d %d\n", result[0], result[1]);
          }
          break;
+      default:
+         printf("Usage: %s <latE6> <lonE6>\n"
+                "   or: %s <s2pw://some.words.here>\n",
+                argv[0], argv[0]);
    }
    return 0;
 }

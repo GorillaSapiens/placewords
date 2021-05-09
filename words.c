@@ -157,10 +157,3 @@ char *ordinal_to_word(int ordinal) {
    }
    return by_ordinal[ordinal]->word;
 }
-
-#ifdef TEST
-void main(void) {
-   init_words("en");
-   printf("%s %d\n", ordinal_to_word(11285), word_to_ordinal("coppa"));
-}
-#endif

@@ -41,7 +41,7 @@
 #define MANY (LFSR_SIZE)
 
 // forward LFSR
-uint64_t f(uint64_t n) {
+static inline uint64_t f(uint64_t n) {
    int lsb = n & 1;
    n >>= 1;
    if (lsb) {
@@ -51,7 +51,7 @@ uint64_t f(uint64_t n) {
 }
 
 // reverse LFSR
-uint64_t g(uint64_t n) {
+static inline uint64_t g(uint64_t n) {
    uint64_t msb = n & (1LL << (LFSR_SIZE - 1));
    if (msb) {
       n ^= POLY;
@@ -65,7 +65,7 @@ uint64_t g(uint64_t n) {
 
 
 // forward MANY times
-uint64_t f_many(uint64_t n) {
+static inline uint64_t f_many(uint64_t n) {
    for (int i = 0; i < MANY; i++) {
       n = f(n);
    }
@@ -73,7 +73,7 @@ uint64_t f_many(uint64_t n) {
 }
 
 // reverse MANY times
-uint64_t g_many(uint64_t n) {
+static inline uint64_t g_many(uint64_t n) {
    for (int i = 0; i < MANY; i++) {
       n = g(n);
    }
@@ -206,28 +206,3 @@ uint64_t placewords_to_s2(const char *placewords) {
 void init_placewords(char *language) {
    init_words(language);
 }
-
-#ifdef TEST
-int main(void) {
-   printf("%d %d %d %d\n",
-         find_word("aaaa"),
-         find_word("mygd"),
-         find_word("myaa"),
-         find_word("fuck"));
-
-   printf("%011lx %011lx\n", f(1), g(f(1)));
-   printf("%011lx %011lx\n", f_many(1), g_many(f_many(1)));
-
-   for (int i = 0; i < 65536; i++) {
-      printf("%ld %ld\n", f_many(g_many(i)), g_many(f_many(i)));
-   }
-
-   for (uint64_t i = 0; i < 65536; i++) {
-      const char *p = s2_to_placewords(i << EXCESS);
-
-      printf("%s %ld\n", p, placewords_to_s2(p) >> EXCESS);
-   }
-
-   return 0;
-}
-#endif
