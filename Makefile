@@ -24,3 +24,5 @@ placewords: placewords.o words.o s2.o main.o
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 
+clean:
+	rm -f *.o placewords
