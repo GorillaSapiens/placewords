@@ -186,7 +186,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
 int double_to_E6(double in) {
    long double integer;
    long double extra = modfl(in * 1000000.0L, &integer);
-   if (extra > .5L) {
+   if (extra >= .5L) {
       integer += 1.0L;
    }
    else if (extra < -.5L) {

@@ -16,9 +16,35 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "s2.h"
 #include "placewords.h"
+
+static inline uint64_t dehex(char *p) {
+   uint64_t result;
+
+   while (*p) {
+      result <<= 4;
+      switch (*p) {
+         case '0' ... '9':
+            result |= (uint64_t) (*p - '0');
+            break;
+         case 'a' ... 'f':
+            result |= (uint64_t) (*p - 'a' + 10);
+            break;
+         case 'A' ... 'F':
+            result |= (uint64_t) (*p - 'A' + 10);
+            break;
+         default:
+            printf("Unrecognized character '%c'\n", *p);
+            exit(-1);
+            break;
+      }
+      p++;
+   }
+   return result;
+}
 
 int main(int argc, char **argv) {
    init_placewords("en");
@@ -30,20 +56,30 @@ int main(int argc, char **argv) {
             int lonE6 = atoi(argv[2]);
             uint64_t s2 = ll_to_s2(latE6, lonE6);
             const char *result = s2_to_placewords(s2);
-            printf("%s\n", result);
+            printf("%016lX\n%s\n", s2, result);
          }
          break;
       case 2:
          {
-            uint64_t s2 = placewords_to_s2(argv[1]);
-            int *result = s2_to_ll(s2);
-            printf("%d %d\n", result[0], result[1]);
+            if (strchr(argv[1], ':') != NULL) {
+               uint64_t s2 = placewords_to_s2(argv[1]);
+               int *result = s2_to_ll(s2);
+               printf("%016lX\n%d %d\n", s2, result[0], result[1]);
+            }
+            else {
+               uint64_t s2 = dehex(argv[1]);
+               int *result = s2_to_ll(s2);
+               printf("%016lX\n%d %d\n", s2, result[0], result[1]);
+               const char *words = s2_to_placewords(s2);
+               printf("%s\n", words);
+            }
          }
          break;
       default:
          printf("Usage: %s <latE6> <lonE6>\n"
-                "   or: %s <s2pw://some.words.here>\n",
-                argv[0], argv[0]);
+                "   or: %s <s2pw://some.words.here>\n"
+                "   or: %s <[0-9a-fA-F]{16}>\n",
+                argv[0], argv[0], argv[0]);
    }
    return 0;
 }
