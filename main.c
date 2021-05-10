@@ -47,7 +47,17 @@ static inline uint64_t dehex(char *p) {
 }
 
 int main(int argc, char **argv) {
-   init_placewords("en");
+   char *arg0 = argv[0];
+
+   if (argc > 1 && argv[1][0] == '=') {
+      init_placewords(argv[1] + 1); // TODO FIX sanitize?
+      argv++;
+      argc--;
+   }
+   else {
+      // default to english
+      init_placewords("en");
+   }
 
    switch(argc) {
       case 3:
@@ -76,10 +86,10 @@ int main(int argc, char **argv) {
          }
          break;
       default:
-         printf("Usage: %s <latE6> <lonE6>\n"
-                "   or: %s <s2pw://some.words.here>\n"
-                "   or: %s <[0-9a-fA-F]{16}>\n",
-                argv[0], argv[0], argv[0]);
+         printf("Usage: %s [=LANG] <latE6> <lonE6>\n"
+                "   or: %s [=LANG] <s2pw://some.words.here>\n"
+                "   or: %s [=LANG] <[0-9a-fA-F]{16}>\n",
+                arg0, arg0, arg0);
    }
    return 0;
 }
