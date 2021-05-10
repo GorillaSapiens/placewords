@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define S2_ERROR (1LL << 63) // an invalid location
+#define S2_ERROR 0 // an invalid location
 
 // a URL style prefix
 #define PREFIX "s2pw://"
@@ -84,13 +84,11 @@ static inline uint64_t g_many(uint64_t n) {
 const char *s2_to_placewords(uint64_t s2) {
    static char result[256];
 
-   //printf("s2=%lX %ld\n", s2, s2);
-
    s2 >>= 1;
 
-   //printf("loci2=%lld\n", (s2 >> EXCESS) & LFSR_MASK);
+   int excess = (s2 & EXCESS_MASK) >> 4;
+
    uint64_t loci = f_many((s2 >> EXCESS) & LFSR_MASK);
-   //printf("loci=%ld\n", loci);
 
    int ordinal1 = ((loci >> (BITS_PER_WORD << 1)) & WORD_MASK);
    int ordinal2 = ((loci >> BITS_PER_WORD) & WORD_MASK);
@@ -111,13 +109,12 @@ const char *s2_to_placewords(uint64_t s2) {
       ordinal3 |= 1LL;
    }
 
-   //printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
-
-   sprintf(result, "%s%s.%s.%s",
+   sprintf(result, "%s%s.%s.%s.%s",
       PREFIX,
       ordinal_to_word(ordinal1),
       ordinal_to_word(ordinal2),
-      ordinal_to_word(ordinal3));
+      ordinal_to_word(ordinal3),
+      ordinal_to_word(excess));
 
    return result;
 }
@@ -144,6 +141,7 @@ uint64_t placewords_to_s2(const char *placewords) {
    if (w3 == NULL) {
       return S2_ERROR;
    }
+   char *we = strtok(NULL, ".");
 
    uint64_t face = 0;
 
@@ -160,7 +158,11 @@ uint64_t placewords_to_s2(const char *placewords) {
       return S2_ERROR;
    }
 
-   //printf("ords=%d %d %d\n", ordinal1, ordinal2, ordinal3);
+   int excess = we ? word_to_ordinal(we) : 0;
+   if (excess == -1) {
+      // if we got this far, we're close, don't error
+      excess = 0;
+   }
 
    if (ordinal1 & 1) {
       face |=  4;
@@ -172,8 +174,6 @@ uint64_t placewords_to_s2(const char *placewords) {
       face |=  1;
    }
 
-   //printf("face=%ld\n", face);
-
    ordinal1 >>= 1;
    ordinal2 >>= 1;
    ordinal3 >>= 1;
@@ -184,21 +184,17 @@ uint64_t placewords_to_s2(const char *placewords) {
    loci <<= BITS_PER_WORD;
    loci |= ordinal3;
 
-   //printf("loci=%ld\n", loci);
-
    loci = g_many(loci);
-
-   //printf("loci2=%ld\n", loci);
 
    uint64_t s2 = face;
    s2 <<= (BITS_PER_WORD * 3);
    s2 |= loci;
    s2 <<= EXCESS;
 
+   s2 |= (uint64_t) (excess << 4);
+
    s2 <<= 1;
    s2 |= 1LL;
-
-   //printf("s2=%lX %ld\n", s2, s2);
 
    return s2;
 }
