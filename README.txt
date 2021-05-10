@@ -35,4 +35,3 @@ older versions.
 Functionality for adding wordlists from other languages is also included.
 
 Please direct feedback to adam@wozniakconsulting.com (Adam Wozniak)
-
