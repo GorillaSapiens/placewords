@@ -37,7 +37,7 @@
 
 #ifdef TEST
 #define debug printf
-#define EPSILON 3
+#define EPSILON 6 // This is 10cm at the equator, less as you go north
 #else
 #define debug(x, ...)
 #endif
@@ -341,8 +341,10 @@ void main(int argc, char **argv) {
    // we skip latitude +/- 90, because of ambiguity
    // ditto for longitude -180
    int imperfect = 0;
+   int total = 0;
    for (int latE6 = -89000000; latE6 < 90000000; latE6 += 1000000) {
       for (int lonE6 = -179000000; lonE6 < 180000000; lonE6 += 1000000) {
+         total++;
          uint64_t s2 = ll_to_s2(latE6, lonE6);
          int *ret = s2_to_ll(s2);
          printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
@@ -356,6 +358,6 @@ void main(int argc, char **argv) {
          }
       }
    }
-   printf("%d imperfect\n", imperfect);
+   printf("%d imperfect out of %d total\n", imperfect, total);
 }
 #endif
