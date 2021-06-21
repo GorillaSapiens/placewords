@@ -58,7 +58,7 @@ fn s2_to_ll(arg : u64) -> [i32; 2] {
    let mut s2 = arg;
    let mut result : [i32; 2] = [0 ; 2];
 
-   println!("s2={:018X} {}", s2, s2);
+   println!("s2={:#018X} {}", s2, s2 as i64);
 
    s2 >>= 1;
 
