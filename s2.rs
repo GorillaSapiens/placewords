@@ -100,11 +100,11 @@ fn s2_to_ll(arg : u64) -> [i32; 2] {
    println!("s = {}", s);
    println!("t = {}", t);
 
-// #ifdef TANGENT
-//    double u = tan(((s * 2.0L - 1.0L) * M_PI) / 4.0L);
-//    double v = tan(((t * 2.0L - 1.0L) * M_PI) / 4.0L);
-// #endif
+   // // TANGENT, do not use
+   // let u : f64 = (((s * 2.0_f64 - 1.0_f64) * PI) / 4.0_f64).tan();
+   // let v : f64 = (((t * 2.0_f64 - 1.0_f64) * PI) / 4.0_f64).tan();
 
+   // QUADRATIC
    let u : f64 =
       if s >= 0.5_f64 { (4.0_f64 * s * s - 1_f64) / 3.0_f64 }
       else { (1.0_f64 - 4.0_f64 * (1.0_f64 - s) * (1.0_f64 - s)) / 3.0_f64 };
@@ -182,77 +182,6 @@ fn s2_to_ll(arg : u64) -> [i32; 2] {
 
    result
 }
-
-
-// #define DEG_TO_RAD (M_PI / 180.0L)
-// #define RAD_TO_DEG (180.0L / M_PI)
-// 
-// #ifdef TEST
-// #define debug printf
-// #define EPSILON 6 // This is 10cm at the equator, less as you go north
-// #else
-// #define debug(x, ...)
-// #endif
-// 
-// int double_to_E6(double in) {
-//    long double integer;
-//    long double extra = modfl(in * 1000000.0L, &integer);
-//    if (extra >= .5L) {
-//       integer += 1.0L;
-//    }
-//    else if (extra < -.5L) {
-//       integer -= 1.0L;
-//    }
-// 
-//    return (int) integer;
-// }
-// 
-// // backward convert from 64 bit S2 to latE6, lonE6
-// // caution, returns static pointer to 2 ints, overwritten per call
-// int *s2_to_ll(uint64_t s2) {
-// 
-//    return result;
-// }
-// 
-
-struct TestStruct {
-   lat_e6 : i32,
-   lon_e6 : i32,
-   s2 : u64,
-}
-
-const TEST_VECTOR: [ TestStruct; 6] = [
-   TestStruct {
-      lat_e6: 33533333,
-      lon_e6: -7583333,
-      s2: 983529568086062495 // 0, casablanca
-   },
-   TestStruct {
-      lat_e6: 28613895,
-      lon_e6: 77209006,
-      s2: 4110909809715404065 // 1, new delhi
-   },
-   TestStruct {
-      lat_e6: 55755833,
-      lon_e6: 37617222,
-      s2: 5095060306123625331 // 2, moscow
-   },
-   TestStruct {
-      lat_e6: -27467778,
-      lon_e6: 153028056,
-      s2: 7751075513880745065 // 3, brisbane
-   },
-   TestStruct {
-      lat_e6: 37749000,
-      lon_e6: -122419400,
-      s2: -9182982296397125021_i64 as u64 // 4, san francisco
-   },
-   TestStruct {
-      lat_e6: -77846323,
-      lon_e6: 166668235,
-      s2: -5803106435262993021_i64 as u64 // 5, mcmurdo
-   },
-];
 
 fn ll_to_s2(lat_e6: i32, lon_e6: i32) -> u64 {
    let mut lat : f64 = lat_e6 as f64 / 1000000.0_f64;
@@ -377,6 +306,45 @@ fn ll_to_s2(lat_e6: i32, lon_e6: i32) -> u64 {
    result
 }
 
+struct TestStruct {
+   lat_e6 : i32,
+   lon_e6 : i32,
+   s2 : u64,
+}
+
+const TEST_VECTOR: [ TestStruct; 6] = [
+   TestStruct {
+      lat_e6: 33533333,
+      lon_e6: -7583333,
+      s2: 983529568086062495 // 0, casablanca
+   },
+   TestStruct {
+      lat_e6: 28613895,
+      lon_e6: 77209006,
+      s2: 4110909809715404065 // 1, new delhi
+   },
+   TestStruct {
+      lat_e6: 55755833,
+      lon_e6: 37617222,
+      s2: 5095060306123625331 // 2, moscow
+   },
+   TestStruct {
+      lat_e6: -27467778,
+      lon_e6: 153028056,
+      s2: 7751075513880745065 // 3, brisbane
+   },
+   TestStruct {
+      lat_e6: 37749000,
+      lon_e6: -122419400,
+      s2: -9182982296397125021_i64 as u64 // 4, san francisco
+   },
+   TestStruct {
+      lat_e6: -77846323,
+      lon_e6: 166668235,
+      s2: -5803106435262993021_i64 as u64 // 5, mcmurdo
+   },
+];
+
 fn main() {
    for i in 0 .. 6 {
       println!("===");
@@ -386,37 +354,36 @@ fn main() {
       let ll : [i32; 2] = s2_to_ll(s2);
       println!("ll={} {}", ll[0], ll[1]);
    }
+
+   // test the planet in 1 degree increments, worldwide
+   // we skip latitude +/- 90, because of ambiguity
+   // ditto for longitude -180
+   let mut imperfect : i32 = 0;
+   let mut total : i32 = 0;
+
+   const EPSILON : i32 = 6;
+
+   for lat_e6 in (-89_000_000..90_000_000).step_by(1_000_000) {
+      for lon_e6 in (-179_000_000..180_000_000).step_by(1_000_000) {
+         total += 1;
+         let s2 : u64 = ll_to_s2(lat_e6, lon_e6);
+         let ll : [ i32; 2] = s2_to_ll(s2);
+
+         let d1 : i32 = (lat_e6 - ll[0]).abs();
+         let d2 : i32 = (lon_e6 - ll[1]).abs();
+
+         println!("in ={} {}", lat_e6, lon_e6);
+         println!("out={} {}", ll[0], ll[1]);
+
+         if d1 > EPSILON || d2 > EPSILON {
+            println!("OOPS");
+            exit(-1);
+         }
+
+         if d1 > 0 || d2 > 0 {
+            imperfect += 1;
+         }
+      }
+   }
+   println!("{} imperfect out of {} total", imperfect, total);
 }
-// void main(int argc, char **argv) {
-//    for (int i = 0; i < 6; i++) {
-//       uint64_t s2 = ll_to_s2(vector[i].latE6, vector[i].lonE6);
-//       int *ret = s2_to_ll(s2);
-//       printf("####\n# %d %d\n# %d %d\n", vector[i].latE6, vector[i].lonE6, ret[0], ret[1]);
-//       printf("# %016lx %016lx\n", vector[i].s2, s2);
-//       printf("# %016lx %016lx\n", vector[i].s2>>1, s2>>1);
-//    }
-// 
-//    // test the planet in 1 degree increments, worldwide
-//    // we skip latitude +/- 90, because of ambiguity
-//    // ditto for longitude -180
-//    int imperfect = 0;
-//    int total = 0;
-//    for (int latE6 = -89000000; latE6 < 90000000; latE6 += 1000000) {
-//       for (int lonE6 = -179000000; lonE6 < 180000000; lonE6 += 1000000) {
-//          total++;
-//          uint64_t s2 = ll_to_s2(latE6, lonE6);
-//          int *ret = s2_to_ll(s2);
-//          printf("##\n# %d %d\n# %d %d\n", latE6, lonE6, ret[0], ret[1]);
-//          if(abs(latE6-ret[0]) > EPSILON || abs(lonE6-ret[1]) > EPSILON) {
-//             printf("OOPS\n");
-//             exit(-1);
-//          }
-//          if(abs(latE6-ret[0]) > 0 || abs(lonE6-ret[1]) > 0) {
-//             printf("CLOSE %d %d %d %d\n", latE6, lonE6, ret[0], ret[1]);
-//             imperfect++;
-//          }
-//       }
-//    }
-//    printf("%d imperfect out of %d total\n", imperfect, total);
-// }
-// #endif
