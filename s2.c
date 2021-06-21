@@ -184,16 +184,20 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
 }
 
 int double_to_E6(double in) {
-   long double integer;
-   long double extra = modfl(in * 1000000.0L, &integer);
-   if (extra >= .5L) {
-      integer += 1.0L;
-   }
-   else if (extra < -.5L) {
-      integer -= 1.0L;
-   }
+   int mid = in * 1000000;
+   int up = mid + 1;
+   int down = mid - 1;
 
-   return (int) integer;
+   double delta_mid = fabs(in - (double)mid / 1000000.0);
+   double delta_up = fabs(in - (double)up / 1000000.0);
+   double delta_down = fabs(in - (double)down / 1000000.0);
+
+   int result = mid;
+
+   if (delta_up < delta_mid) { result = up; }
+   if (delta_down < delta_mid) { result = down; }
+
+   return result;
 }
 
 // backward convert from 64 bit S2 to latE6, lonE6
