@@ -15,7 +15,7 @@
 # Author: adam@wozniakconsulting.com (Adam Wozniak)
 
 CC=gcc
-CFLAGS=-g -O
+CFLAGS=-Wall -g -O
 LIBS=-lm
 
 placewords: placewords.o words.o s2.o main.o

@@ -17,13 +17,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <ctype.h>
 
 #include "s2.h"
 #include "placewords.h"
 
 static inline uint64_t dehex(char *p) {
-   uint64_t result;
+   uint64_t result = 0;
 
    while (*p) {
       result <<= 4;
@@ -95,7 +96,7 @@ int main(int argc, char **argv) {
             }
             uint64_t s2 = ll_to_s2(latE6, lonE6);
             const char *result = s2_to_placewords(s2);
-            printf("s2=%016llX\n", s2);
+            printf("s2=%016" PRIx64 "\n", s2);
             printf("latE6=%d lonE6=%d\n", latE6, lonE6);
             printf("lat=%.6f lon=%.6f\n", latE6 / 1e6, lonE6 / 1e6);
             printf("%s\n", result);
@@ -106,14 +107,14 @@ int main(int argc, char **argv) {
             if (strchr(argv[1], ':') != NULL) {
                uint64_t s2 = placewords_to_s2(argv[1]);
                int *result = s2_to_ll(s2);
-               printf("s2=%016llX\n", s2);
+               printf("s2=%016" PRIx64 "\n", s2);
                printf("latE6=%d lonE6=%d\n", result[0], result[1]);
                printf("lat=%.6f lon=%.6f\n", result[0] / 1e6, result[1] / 1e6);
             }
             else {
                uint64_t s2 = dehex(argv[1]);
                int *result = s2_to_ll(s2);
-               printf("s2=%016llX\n", s2);
+               printf("s2=%016" PRIx64 "\n", s2);
                printf("latE6=%d lonE6=%d\n", result[0], result[1]);
                printf("lat=%.6f lon=%.6f\n", result[0] / 1e6, result[1] / 1e6);
                const char *words = s2_to_placewords(s2);

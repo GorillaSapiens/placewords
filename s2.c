@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define FACE_UNKNOWN -1
 #define FACE_XPOS 0 // africa
 #define FACE_YPOS 1 // asia
 #define FACE_ZPOS 2 // north
@@ -79,7 +80,7 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
    double ratio;
    double u, v;
 
-   uint64_t result;
+   uint64_t result = FACE_UNKNOWN;
 
    if (fabs(x) >= fabs(y) && fabs(x) >= fabs(z)){
       ratio = fabs(x);
@@ -119,6 +120,10 @@ uint64_t ll_to_s2(int latE6, int lonE6) {
          u = x / ratio;
          v = y / ratio;
       }
+   }
+   else {
+      fprintf(stderr, "internal error %s:%d\n", __FILE__, __LINE__);
+      exit(-1);
    }
    debug("face = %ld\n", result);
    debug("u = %.16lf\n", u);
@@ -293,6 +298,9 @@ int *s2_to_ll(uint64_t s2) {
          y = v;
          z = -1.0;
          break;
+      default:
+         fprintf(stderr, "internal error %s:%d\n", __FILE__, __LINE__);
+         exit(-1);
    }
 
    double r = sqrt(x*x + y*y + z*z);
