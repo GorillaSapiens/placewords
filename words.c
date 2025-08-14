@@ -148,6 +148,7 @@ int init_words(const char *language) {
    printf("hash: empty=%d average=%f biggest=%d smallest=%d zero=%d\n",
          empty, (float)sum/(float)HASH_SIZE, biggest, smallest, hash_count[0]);
 #endif
+   return 0;
 }
 
 char *ordinal_to_word(int ordinal) {
