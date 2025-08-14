@@ -122,10 +122,19 @@ int main(int argc, char **argv) {
          }
          break;
       default:
-         printf("Usage: %s [=LANG] <latE6> <lonE6>\n"
+         printf("Usage: %s [=LANG] <latitude> <longitude>\n"
+               "   or: %s [=LANG] <latE6> <lonE6>\n"
                "   or: %s [=LANG] <s2pw://some.words.here>\n"
                "   or: %s [=LANG] <[0-9a-fA-F]{16}>\n",
-               arg0, arg0, arg0);
+               arg0, arg0, arg0, arg0);
+         printf("   (South latitudes and West longitudes are negative)\n");
+         printf("\n");
+         printf("Examples:\n");
+         printf("   %s 44.911759 -116.114708\n", arg0);
+         printf("   %s 44911759 -116114708\n", arg0);
+         printf("   %s 54A666CFFFFFFB6F\n", arg0);
+         printf("   %s s2pw://researching.oncoming.refereed\n", arg0);
+         printf("   %s s2pw://researching.oncoming.refereed.wray\n", arg0);
    }
    return 0;
 }
