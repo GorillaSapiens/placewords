@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "s2.h"
 #include "placewords.h"
@@ -50,9 +51,29 @@ int main(int argc, char **argv) {
    char *arg0 = argv[0];
 
    if (argc > 1 && argv[1][0] == '=') {
-      init_placewords(argv[1] + 1); // TODO FIX sanitize?
-      argv++;
-      argc--;
+      char *original = strdup(argv[1] + 1);
+
+      // sanitize our input, we expect an ISO 639-1
+      // style 2 letter code.
+      char *p = argv[1] + 1;
+      while (*p) {
+         if (!isalnum(*p)) {
+            *p = 0;
+            break;
+         }
+         p++;
+      }
+
+      if (strlen(argv[1] + 1)) {
+         init_placewords(argv[1] + 1); // TODO FIX sanitize?
+         argv++;
+         argc--;
+      }
+      else {
+         fprintf(stderr, "did not understand '%s'\n", original);
+         fprintf(stderr, "expecting a 2 character code like 'en' or '32'\n");
+         exit(-1);
+      }
    }
    else {
       // default to english
@@ -62,11 +83,22 @@ int main(int argc, char **argv) {
    switch(argc) {
       case 3:
          {
-            int latE6 = atoi(argv[1]);
-            int lonE6 = atoi(argv[2]);
+            int latE6, lonE6;
+
+            if (strchr(argv[1], '.') || strchr(argv[2], '.')) {
+               latE6 = (int) (atof(argv[1]) * 1e6);
+               lonE6 = (int) (atof(argv[2]) * 1e6);
+            }
+            else {
+               latE6 = atoi(argv[1]);
+               lonE6 = atoi(argv[2]);
+            }
             uint64_t s2 = ll_to_s2(latE6, lonE6);
             const char *result = s2_to_placewords(s2);
-            printf("%016lX\n%s\n", s2, result);
+            printf("s2=%016lX\n", s2);
+            printf("latE6=%d lonE6=%d\n", latE6, lonE6);
+            printf("lat=%.6f lon=%.6f\n", latE6 / 1e6, lonE6 / 1e6);
+            printf("%s\n", result);
          }
          break;
       case 2:
@@ -74,12 +106,16 @@ int main(int argc, char **argv) {
             if (strchr(argv[1], ':') != NULL) {
                uint64_t s2 = placewords_to_s2(argv[1]);
                int *result = s2_to_ll(s2);
-               printf("%016lX\n%d %d\n", s2, result[0], result[1]);
+               printf("s2=%016lX\n", s2);
+               printf("latE6=%d lonE6=%d\n", result[0], result[1]);
+               printf("lat=%.6f lon=%.6f\n", result[0] / 1e6, result[1] / 1e6);
             }
             else {
                uint64_t s2 = dehex(argv[1]);
                int *result = s2_to_ll(s2);
-               printf("%016lX\n%d %d\n", s2, result[0], result[1]);
+               printf("s2=%016lX\n", s2);
+               printf("latE6=%d lonE6=%d\n", result[0], result[1]);
+               printf("lat=%.6f lon=%.6f\n", result[0] / 1e6, result[1] / 1e6);
                const char *words = s2_to_placewords(s2);
                printf("%s\n", words);
             }
@@ -87,9 +123,9 @@ int main(int argc, char **argv) {
          break;
       default:
          printf("Usage: %s [=LANG] <latE6> <lonE6>\n"
-                "   or: %s [=LANG] <s2pw://some.words.here>\n"
-                "   or: %s [=LANG] <[0-9a-fA-F]{16}>\n",
-                arg0, arg0, arg0);
+               "   or: %s [=LANG] <s2pw://some.words.here>\n"
+               "   or: %s [=LANG] <[0-9a-fA-F]{16}>\n",
+               arg0, arg0, arg0);
    }
    return 0;
 }
