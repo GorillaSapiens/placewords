@@ -30,7 +30,7 @@ The process is **fully reversible**, letting you go from words back to coordinat
 - Minimalist built-in S2 library for portability (swap with full Google S2 if desired).  
 - Custom wordlists (replace offensive words, add new languages).  
 - Stable results — older PlaceWords will remain valid in future versions.  
-- Works anywhere on Earth, even without GPS service.
+- Works anywhere on Earth, even without internet service.
 
 ---
 
