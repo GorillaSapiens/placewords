@@ -20,8 +20,9 @@
 // without pulling in the full weight of the S2
 // library.
 
-// caveat emptor: I did this mostly to learn a little rust, there may be
-// glaring newbie errors here.
+// caveat emptor: I did this mostly to learn a little rust, there may
+// be glaring newbie errors here.  this file is not actually used by
+// anything else in the project.
 
 use std::process::exit;
 use std::f64::consts::PI;
