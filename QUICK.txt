@@ -1,0 +1,16 @@
+🚀 PlaceWords — A Free, Open, Offline Alternative to What3Words
+
+Body:
+Tired of What3Words’ secret algorithm, lawsuits, and lock-in? I built PlaceWords — an open-source, patent-safe system that maps every 5-meter square on Earth to 3 easy words.
+
+Free & Open (Apache 2.0)
+
+Offline-Capable — perfect for remote work, disasters, and adventure
+
+Patent-Safe — no infringement on W3W
+
+Future-Proof — replace words, add languages, keep compatibility
+
+Uses Google’s open S2 geometry system under the hood. Works anywhere, reversible back to coordinates, and you can self-host or embed in anything.
+
+GitHub: https://github.com/GorillaSapiens/placewords

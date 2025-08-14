@@ -1,0 +1,19 @@
+Title:
+What3Words Won’t Let You Use It Offline — So I Made an Open Replacement
+
+Body:
+What3Words is proprietary, patent-encumbered, and sues people who try to reimplement it. It won’t even give you the word list — so no offline use.
+
+So I built PlaceWords: a free, open-source, patent-safe system that maps every 5m square on Earth to 3 words.
+
+Apache 2.0 licensed — fork, self-host, embed anywhere
+
+Works completely offline
+
+No lock-in — replace words, add languages, keep compatibility
+
+Patent-safe — not a clone, just better
+
+Powered by the open S2 geometry system. Fully reversible to coordinates. Try it, break it, improve it.
+
+GitHub: https://github.com/GorillaSapiens/placewords
